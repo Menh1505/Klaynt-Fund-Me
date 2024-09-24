@@ -4,10 +4,10 @@
 pragma solidity ^0.8.19;
 // 2. Imports
 // Chúng ta import thư viện orakl để chúng ta có thể tương tác với oracle
-import { IAggregator } from "@bisonai/orakl-contracts/src/v0.1/interfaces/IAggregator.sol";
+import {IAggregator} from "@bisonai/orakl-contracts/src/v0.1/interfaces/IAggregator.sol";
 
 // Chúng ta import thư viện PriceConverter để chúng ta tính toán giá trị Ether
-import { PriceConverter } from "./PriceConverter.sol";
+import {PriceConverter} from "./PriceConverter.sol";
 
 // 3. Interfaces, Libraries, Contracts
 // Khai báo error không phải là Owner của contract
@@ -21,7 +21,7 @@ error FundMe__NotOwner();
  */
 contract FundMe {
     // Type Declarations
-    // Dòng tiếp theo có nghĩa là 
+    // Dòng tiếp theo có nghĩa là
     // "sử dụng library PriceConverter cho những biến có type là uint256"
     using PriceConverter for uint256;
 
@@ -66,9 +66,12 @@ contract FundMe {
     }
 
     /// @notice Funds our contract based on the KLAY/USDT price from Orakl
-       // Gửi tiền vào contract của chúng ta dựa trên giá ETH/USD
+    // Gửi tiền vào contract của chúng ta dựa trên giá ETH/USD
     function fund() public payable {
-        require(msg.value.getConversionRate(s_priceFeed) >= MINIMUM_USD, "You need to spend more ETH!");
+        require(
+            msg.value.getConversionRate(s_priceFeed) >= MINIMUM_USD,
+            "You need to spend more ETH!"
+        );
         // require(PriceConverter.getConversionRate(msg.value) >= MINIMUM_USD, "You need to spend more ETH!");
         // Sau đó map địa chỉ của người gửi với msg.value trong mapping s_addressToAmountFunded
         s_addressToAmountFunded[msg.sender] += msg.value;
@@ -78,7 +81,11 @@ contract FundMe {
 
     function withdraw() public onlyOwner {
         // dùng for loop, bắt đàu từ index 0 đến index ít hơn length của danh sách, và index cộng 1 cho mỗi vòng loop
-        for (uint256 funderIndex = 0; funderIndex < s_funders.length; funderIndex++) {
+        for (
+            uint256 funderIndex = 0;
+            funderIndex < s_funders.length;
+            funderIndex++
+        ) {
             // gán giá trị address tại funderIndex trong danh sách s_funders vào address funder
             address funder = s_funders[funderIndex];
             // thay đổi giá trị của mapping s_addressToAmountFunded có address là funder thành 0, tức là funder này đã withdraw
@@ -94,8 +101,8 @@ contract FundMe {
         // payable(msg.sender).transfer(address(this).balance);
 
         // Gửi toàn bộ balance của contract này tới i_owner và không có data trong transaction và trả về boolean success hay không
-        (bool success,) = i_owner.call{value: address(this).balance}("");
-        // Yêu cầu bool success true nếu không thì revert toàn bộ        
+        (bool success, ) = i_owner.call{value: address(this).balance}("");
+        // Yêu cầu bool success true nếu không thì revert toàn bộ
         require(success);
     }
 
@@ -103,13 +110,17 @@ contract FundMe {
         // Copy danh sách s_funders từ storage vào memory, tức là load từ global state vào local state. Thay đổi global state tốn nhiều gas hơn local state
         address[] memory funders = s_funders;
         // mappings can't be in memory, sorry!
-        for (uint256 funderIndex = 0; funderIndex < funders.length; funderIndex++) {
+        for (
+            uint256 funderIndex = 0;
+            funderIndex < funders.length;
+            funderIndex++
+        ) {
             address funder = funders[funderIndex];
             s_addressToAmountFunded[funder] = 0;
         }
         s_funders = new address[](0);
         // payable(msg.sender).transfer(address(this).balance);
-        (bool success,) = i_owner.call{value: address(this).balance}("");
+        (bool success, ) = i_owner.call{value: address(this).balance}("");
         require(success);
     }
 
@@ -120,7 +131,9 @@ contract FundMe {
      *  @param fundingAddress the address of the funder
      *  @return the amount funded
      */
-    function getAddressToAmountFunded(address fundingAddress) public view returns (uint256) {
+    function getAddressToAmountFunded(
+        address fundingAddress
+    ) public view returns (uint256) {
         return s_addressToAmountFunded[fundingAddress];
     }
 
